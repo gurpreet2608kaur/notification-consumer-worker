@@ -2,8 +2,8 @@ name = "notification-consumer-worker"
 main = "src/worker.js"
 compatibility_date = "2025-08-19"
 compatibility_flags = ["nodejs_compat"]
-
-
+[observability.logs]
+enabled = true
 
 # Hyperdrive binding (Postgres)
 [[hyperdrive]]
