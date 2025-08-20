@@ -7,8 +7,8 @@ compatibility_flags = ["nodejs_compat"]
 
 # Hyperdrive binding (Postgres)
 [[hyperdrive]]
-binding = "DB"
-id = "my-postgres-db"
+binding = "HYPERDRIVE"
+id = "c3e1bf6e888a46a1815dfe02fa7559b1"
 
 # 👇 Add this for local dev
 localConnectionString = "postgresql://cladbetestuser:cladbe%40123@80.65.208.176:5432/cladbedatabase_testing"
@@ -16,3 +16,4 @@ localConnectionString = "postgresql://cladbetestuser:cladbe%40123@80.65.208.176:
 # Queue consumer binding
 [[queues.consumers]]
 queue = "notification-queues"
+

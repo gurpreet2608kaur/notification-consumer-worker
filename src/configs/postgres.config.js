@@ -5,7 +5,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 
 export function getDb(env) {
   // Wrangler injects env.DB as a Hyperdrive binding
-  const connectionString = env.DB?.connectionString;
+  const connectionString = env.HYPERDRIVE?.connectionString;
 
   if (!connectionString) {
     throw new Error("❌ No DB connection string found. Check wrangler.toml or env vars.");
