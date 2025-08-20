@@ -9,5 +9,11 @@
 	},
 	"devDependencies": {
 		"wrangler": "^4.31.0"
+	},
+	"dependencies": {
+		"dotenv": "^17.2.1",
+		"drizzle-orm": "^0.44.4",
+		"hono": "^4.9.2",
+		"postgres": "^3.4.7"
 	}
 }
