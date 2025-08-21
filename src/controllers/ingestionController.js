@@ -1,4 +1,5 @@
-import { createNotification } from "./notificationController.js";
+// ingestionController.js
+import { createNotification } from "../helpers/postgres.js";
 
 export async function queueConsumer(batch, env) {
   console.log(`🔄 Processing ${batch.messages.length} messages from queue`);
@@ -19,8 +20,16 @@ export async function queueConsumer(batch, env) {
         },
       };
 
-      // Save to Postgres
+     
+      // write a if condition here if else condtion here to first move the object into durable object and then save into postgresql and leave else block empty 
+
       await createNotification(fakeContext);
+
+      if (condition) {
+        
+      } else {
+        
+      }
 
       console.log("✅ Notification saved from queue:", msg.id);
 

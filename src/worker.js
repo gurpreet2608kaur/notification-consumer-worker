@@ -1,6 +1,7 @@
+// worker.js
 import { Hono } from "hono";
-import { createNotification } from "./controllers/notificationController.js";
-import { queueConsumer } from "./controllers/queueController.js";
+import { createNotification } from "./helpers/postgres.js";
+import { queueConsumer } from "./controllers/ingestionController.js";
 
 const app = new Hono();
 
