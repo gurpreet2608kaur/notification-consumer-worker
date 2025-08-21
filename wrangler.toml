@@ -17,3 +17,9 @@ localConnectionString = "postgresql://cladbetestuser:cladbe%40123@80.65.208.176:
 [[queues.consumers]]
 queue = "notification-queues"
 
+# scheduled Queue consumer binding
+[[queues.consumers]]
+queue = "scheduled-notification-queue"
+
+
+
