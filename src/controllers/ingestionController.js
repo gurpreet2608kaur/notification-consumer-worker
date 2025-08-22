@@ -22,7 +22,7 @@ export async function queueConsumer(batch, env) {
 
      
       // write a if condition here if else condtion here to first move the object into durable object and then save into postgresql and leave else block empty 
-
+console.log("📥 Processing message:", msg.id);
       await createNotification(fakeContext);
 
    if (hasScheduleTime(requestBody)) {

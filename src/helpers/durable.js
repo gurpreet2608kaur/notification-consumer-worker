@@ -39,6 +39,7 @@ export async function sendToDurableObjectQueue(notificationData) {
  * @returns {boolean} True if contains schedule_time
  */
 export function hasScheduleTime(notificationData) {
+  console.log("Checking for schedule_time in:", notificationData);
   return notificationData?.content?.schedule_time !== undefined;
 }
 
