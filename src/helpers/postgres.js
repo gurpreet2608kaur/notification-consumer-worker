@@ -1,21 +1,20 @@
-// notificationController.js
+// postgres.js
 import { getDb } from "../configs/postgres.config.js";
 import { notifications } from "../models/notificationModels.js";
 
-export const createNotification = async (c) => {
+export const createNotification = async (env, notificationData) => {
   try {
-    const db = getDb(c.env);
-    const body = await c.req.json();
+    const db = getDb(env);
 
     const [notification] = await db
       .insert(notifications)
-      .values(body)
+      .values(notificationData)
       .returning();
 
-    return c.json({ success: true, data: notification });
+    console.log("📥 DB Inserted notification:", notification);
+    return { success: true, data: notification };
   } catch (error) {
-    console.error("Error creating notification:", error);
-    return c.json({ success: false, error: "Failed to create notification" }, 500);
+    console.error("❌ Error creating notification:", error);
+    return { success: false, error: "Failed to create notification" };
   }
 };
-

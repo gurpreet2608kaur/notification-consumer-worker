@@ -1,53 +1,41 @@
-// durable.js 
-
-// durableObjectController.js
-
-const DURABLE_OBJECT_URL = "https://notification-durable-object.amiltusgroup.workers.dev/notification";
-
 /**
- * Send notification data to durable object worker
+ * Send notification data to the Durable Object instance
+ * @param {Object} env - Worker environment (must contain NOTIFICATION binding)
  * @param {Object} notificationData - The notification object to be sent
  * @returns {Promise<boolean>} Success status
  */
-export async function sendToDurableObjectQueue(notificationData) {
+export async function sendToDurableObjectQueue(env, notificationData) {
   try {
-    console.log("📤 Calling durable object worker for:", notificationData.company_id);
-    
-    const response = await fetch(DURABLE_OBJECT_URL, {
+    console.log("📤 Sending to Durable Object:", notificationData);
+
+    // Get deterministic DO instance
+    const id = env.DURABLEOBJECT.idFromName("notification");
+    const stub = env.DURABLEOBJECT.get(id);
+
+    // Call DO /store endpoint
+    const response = await stub.fetch("http://do/store", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(notificationData),
     });
 
+    console.log("🔎 DO response status:", response.status);
+
     if (!response.ok) {
-      throw new Error(`Durable object worker responded with status: ${response.status}`);
+      throw new Error(`DO responded with ${response.status}`);
     }
 
-    console.log("✅ Successfully called durable object worker");
+    console.log("✅ Stored notification in DO");
     return true;
   } catch (error) {
-    console.error("❌ Failed to call durable object worker:", error.message);
+    console.error("❌ Failed to store notification in DO:", error.message);
     throw error;
   }
 }
 
 /**
  * Check if notification data contains schedule time
- * @param {Object} notificationData - The notification object to check
- * @returns {boolean} True if contains schedule_time
  */
 export function hasScheduleTime(notificationData) {
-  console.log("Checking for schedule_time in:", notificationData);
   return notificationData?.content?.schedule_time !== undefined;
 }
-
-
-
-
-
-
-
-
-/// write controller here to add the notification into the durable object
