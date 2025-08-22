@@ -1,6 +1,6 @@
 // ingestionController.js
 import { createNotification } from "../helpers/postgres.js";
-
+import { sendToDurableObjectQueue, hasScheduleTime } from "../helpers/durable.js";
 export async function queueConsumer(batch, env) {
   console.log(`🔄 Processing ${batch.messages.length} messages from queue`);
 
@@ -25,11 +25,18 @@ export async function queueConsumer(batch, env) {
 
       await createNotification(fakeContext);
 
-      if (condition) {
+   if (hasScheduleTime(requestBody)) {
+           console.log("⏰ Scheduled notification detected, sending to durable object queue");
         
+        // Send to durable object worker via queue
+        await sendToDurableObjectQueue(requestBody, env);
+        
+   
       } else {
-        
+        // No schedule_time, leave empty as requested
       }
+
+      console.log("✅ Notification processed from queue:", msg.id);
 
       console.log("✅ Notification saved from queue:", msg.id);
 
