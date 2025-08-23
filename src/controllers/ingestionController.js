@@ -8,7 +8,7 @@ export async function queueConsumer(batch, env) {
   for (const msg of batch.messages) {
     try {
       const notificationData = msg.body;
-      console.log("📥 Processing message:", notificationData);
+      console.log("📥 Processing Notification message:", notificationData);
 
       // 1. Save into PostgreSQL
       const dbResult = await createNotification(env, notificationData);

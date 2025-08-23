@@ -17,8 +17,18 @@ localConnectionString = "postgresql://cladbetestuser:cladbe%40123@80.65.208.176:
 [[queues.consumers]]
 queue = "notification-queues"
 
+
+
 [[durable_objects.bindings]]
 name = "DURABLEOBJECT"
 class_name = "MyDurableObject"
 script_name = "notification-durable-object"
 
+# scheduled Queue consumer binding
+[[queues.consumers]]
+queue = "scheduled-notification-queue"
+
+
+[vars]
+NOTIFICATION_QUEUE = "notification-queues"
+SCHEDULED_NOTIFICATION_QUEUE = "scheduled-notification-queue"
