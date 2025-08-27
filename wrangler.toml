@@ -32,3 +32,13 @@ queue = "scheduled-notification-queue"
 [vars]
 NOTIFICATION_QUEUE = "notification-queues"
 SCHEDULED_NOTIFICATION_QUEUE = "scheduled-notification-queue"
+
+
+[[workflows]]
+binding = "NOTIFICATION_WORKFLOW"   # Access via env.NOTIFICATION_WORKFLOW
+name = "NotificationWorkflow"       # Friendly display name
+class_name = "NotificationWorkflow" # Must match your exported class
+
+
+
+ 

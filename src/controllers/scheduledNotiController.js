@@ -1,8 +1,6 @@
 // src/controllers/scheduledNotiController.js
 
 
-// src/controllers/scheduledNotiController.js
-
 export async function scheduledNotiConsumer(batch, env) {
   console.log(`⏰ Processing 📥 scheduled message: ${batch.messages.length} scheduled notifications`);
 
