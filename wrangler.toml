@@ -40,5 +40,9 @@ name = "NotificationWorkflow"       # Friendly display name
 class_name = "NotificationWorkflow" # Must match your exported class
 
 
+[[workflows]]
+binding = "WHATSAPP_NOTIFICATION_WORKFLOW"
+name = "WhatsappNotificationWorkflow"
+class_name = "WhatsappNotificationWorkflow"
 
- 
+
