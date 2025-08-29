@@ -21,7 +21,7 @@ function pemToArrayBuffer(pem) {
     .replace(/-----BEGIN PRIVATE KEY-----/, "")
     .replace(/-----END PRIVATE KEY-----/, "")
     .replace(/\s+/g, "");
-  const raw = atob(b64);
+  const raw = atob(b64);  
   const buffer = new Uint8Array(raw.length);
   for (let i = 0; i < raw.length; i++) {
     buffer[i] = raw.charCodeAt(i);
@@ -38,7 +38,16 @@ function base64urlEncode(uint8Array) {
   return btoa(binary).replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
 
-export async function getAccessToken() {
+export async function getAccessToken(env) {
+  const serviceAccount = JSON.parse(env.SERVICE_ACCOUNT_KEY || '{}');
+
+  if (!serviceAccount.client_email) {
+    throw new NonRetryableError('Missing serviceAccount.client_email');
+  }
+  if (!serviceAccount.private_key) {
+    throw new NonRetryableError('Missing serviceAccount.private_key');
+  }
+
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + 3600;
 
@@ -89,43 +98,86 @@ export async function getAccessToken() {
   }
   return json.access_token;
 }
+// src/notificationServices/fcmService.js
+export async function sendMessage(accessToken, deviceToken, payload, env) {
+  console.log("➡️ Sending FCM message:", {accessToken, deviceToken, payload });
 
-export async function sendMessage(env, deviceToken) {
-  try {
-    const accessToken = await getAccessToken();
+  const url = `https://fcm.googleapis.com/v1/projects/${env.FCM_PROJECT_ID}/messages:send`;
 
-    const payload = {
-      message: {
-        token: deviceToken,
-        notification: {
-          title: "Hello from Worker ",
-          body: "This is a push notification from Cloudflare Worker",
-        },
-      },
-    };
-
-    const res = await fetch(
-      `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+  const body = {
+    message: {
+      token: deviceToken,
+      notification: {
+        title: payload.title,
+        body: payload.body
       }
-    );
-
-    const json = await res.json();
-    if (!res.ok) {
-      console.error("❌ FCM error:", json);
-      throw new Error(`FCM send failed: ${JSON.stringify(json)}`);
     }
+  };
 
-    console.log("Notification sent:", json);
-    return json;
-  } catch (err) {
-    console.error("sendMessage error:", err.message);
-    throw err;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  // ✅ Always consume response body
+  const text = await res.text();
+
+  console.log("⬅️ FCM response status:", res.status);
+  console.log("⬅️ FCM response body:", text);
+
+  if (!res.ok) {
+    throw new Error(`FCM send failed (${res.status}): ${text}`);
   }
+
+  return JSON.parse(text);
 }
+
+// export async function sendMessage(accessToken, deviceToken, payload, env) {
+//   try {
+
+//     console.log("sendMessage called with: 11", {accessToken,  deviceToken, payload });
+//     const serviceAccount = JSON.parse(env.SERVICE_ACCOUNT_KEY || '{}');
+//     if (!serviceAccount.project_id) {
+//       throw new NonRetryableError("Missing serviceAccount.project_id");
+//     }
+
+//     const message = {
+//       message: {
+//         token: deviceToken,
+//         notification: {
+//           title: payload.title,
+//           body: payload.body
+//         }
+//       }
+//     };
+
+//       console.log("sendMessage called with:22", {message});
+//     const res = await fetch(
+//       `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`,
+//       {
+//         method: "POST",
+//         headers: {
+//           "Authorization": `Bearer ${accessToken}`,
+//           "Content-Type": "application/json"
+//         },
+//         body: JSON.stringify(message)
+//       }
+//     );
+
+//     const json = await res.json();
+//     if (!res.ok) {
+//       console.error("❌ FCM error:", json);
+//       throw new Error(`FCM send failed: ${JSON.stringify(json)}`);
+//     }
+
+//     console.log("Notification sent:", json);
+//     return json;
+//   } catch (err) {
+//     console.error("sendMessage error:", err.message);
+//     throw err;
+//   }
+// }

@@ -1,3 +1,4 @@
+// sendWhatsapp.js
 import { WorkflowEntrypoint } from "cloudflare:workers";
 
 export class WhatsappNotificationWorkflow extends WorkflowEntrypoint {

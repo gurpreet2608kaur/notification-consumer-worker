@@ -16,7 +16,7 @@ export class NotificationRouter {
         }
 
         const availableChannels = this.getAvailableChannels(content);
-        console.log("📊 Available channels:", availableChannels);
+        console.log(" Available channels:", availableChannels);
 
         const results = { whatsapp: null, fcm: null, errors: [] };
         const hasWhatsApp = availableChannels.includes('whatsapp');
@@ -83,11 +83,11 @@ export class NotificationRouter {
 
     // ✅ Only forward WhatsApp fields required by API
     async executeWhatsappWorkflow(whatsappContent) {
-        console.log("🚀 Starting WhatsApp workflow" , whatsappContent);
+        console.log("🚀 Starting WhatsApp workflow", whatsappContent);
 
         // Minimal data, as static payload is used in sendWhatsapp.js
         const whatsappData = {
-            recipient_phone: whatsappContent.recipient_phone?.[0] ,
+            recipient_phone: whatsappContent.recipient_phone?.[0],
             message: whatsappContent.body || "this is a test message app",
             agent_id: whatsappContent.agent_id || "45678",
             waba_phone_number: whatsappContent.business_number || "+918941999555",
@@ -105,7 +105,7 @@ export class NotificationRouter {
     }
 
     async executeFcmWorkflow(mobileContent, fullRequest) {
-        console.log("🚀 Starting FCM workflow");
+        console.log("Starting FCM workflow", JSON.stringify(mobileContent, null, 2));
 
         const deviceToken = mobileContent.fcm_token?.[0];
         if (!deviceToken) {
@@ -115,23 +115,35 @@ export class NotificationRouter {
         const workflowInput = {
             deviceToken,
             payload: {
-                title: mobileContent.title || "Notification",
-                body: mobileContent.body || "You have a new notification"
+                title: mobileContent.title || "Default Title",
+                body: mobileContent.body || "Default Body"
             },
             company_id: fullRequest.company_id,
             employee_id: fullRequest.employee_id
         };
 
-        const workflowId = this.generateWorkflowId('fcm');
-        const workflowInstance = await this.env.NOTIFICATION_WORKFLOW.create({
-            id: workflowId,
-            params: workflowInput
-        });
+        console.log("FCM workflow input:", JSON.stringify(workflowInput, null, 2));
 
-        const result = await workflowInstance.result();
-        console.log("🎉 FCM Workflow result:", result);
-        return result;
+        const workflowId = this.generateWorkflowId('fcm');
+        console.log("Generated workflow ID:", workflowId);
+
+        let workflowInstance;
+        try {
+            workflowInstance = await this.env.NOTIFICATION_WORKFLOW.create({
+                id: workflowId,
+                params: workflowInput
+            });
+            console.log("Workflow instance created:", workflowId);
+        } catch (error) {
+            console.error("Failed to create workflow instance:", error.message, error.stack);
+            throw new Error(`Workflow creation failed: ${error.message}`);
+        }
+
+        // Use pollWorkflowCompletion instead of workflowInstance.run()
+        return this.pollWorkflowCompletion(workflowInstance, 'FCM');
     }
+
+
 
     async pollWorkflowCompletion(workflowInstance, workflowType) {
         const maxAttempts = 60; // Increased to 60 seconds
@@ -160,8 +172,11 @@ export class NotificationRouter {
         throw new Error(`${workflowType} workflow timed out after ${maxAttempts} seconds`);
     }
 
-    generateWorkflowId(type) {
-        return `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    generateWorkflowId(prefix) {
+        const timestamp = Date.now();
+        const randomStr = Math.random().toString(36).substring(2, 10);
+        return `${prefix}-${timestamp}-${randomStr}`;
     }
 
     isWorkflowRunning(status) {

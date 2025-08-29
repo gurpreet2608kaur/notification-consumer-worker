@@ -32,6 +32,7 @@ queue = "scheduled-notification-queue"
 [vars]
 NOTIFICATION_QUEUE = "notification-queues"
 SCHEDULED_NOTIFICATION_QUEUE = "scheduled-notification-queue"
+FCM_PROJECT_ID= "cladbee-6554e"
 
 
 [[workflows]]
