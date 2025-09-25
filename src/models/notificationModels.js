@@ -8,7 +8,7 @@ export const notifications = pgTable("notifications", {
 
   // channels is array (stored as JSON)
   channels: json("channels").notNull(),
-
+ request_type: text("request_type").notNull(),
   type: text("type").notNull(),
   status: text("status").default("pending"),
 

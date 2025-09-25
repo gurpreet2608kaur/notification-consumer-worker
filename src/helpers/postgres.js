@@ -1,7 +1,7 @@
 // postgres.js
 import { getDb } from "../configs/postgres.config.js";
 import { notifications } from "../models/notificationModels.js";
-
+import { campaignNotifications } from "../models/campaignNotificationModel.js";
 export const createNotification = async (env, notificationData) => {
   try {
     const db = getDb(env);
@@ -16,5 +16,22 @@ export const createNotification = async (env, notificationData) => {
   } catch (error) {
     console.error("❌ Error creating notification:", error);
     return { success: false, error: "Failed to create notification" };
+  }
+};
+
+export const createCampaignNotification = async (env, notificationData) => {
+  try {
+    const db = getDb(env);
+
+    const [notification] = await db
+      .insert(campaignNotifications)
+      .values(notificationData)
+      .returning();
+
+    console.log("📥 DB Inserted campaign notification:", notification);
+    return { success: true, data: notification };
+  } catch (error) {
+    console.error("❌ Error creating campaign notification:", error);
+    return { success: false, error: "Failed to create campaign notification" };
   }
 };
