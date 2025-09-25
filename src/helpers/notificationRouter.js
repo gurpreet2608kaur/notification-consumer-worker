@@ -82,26 +82,62 @@ export class NotificationRouter {
     }
 
     // ✅ Only forward WhatsApp fields required by API
+    // async executeWhatsappWorkflow(whatsappContent) {
+    //     console.log("🚀 Starting WhatsApp workflow", whatsappContent);
+
+    //     // Minimal data, as static payload is used in sendWhatsapp.js
+    //     const whatsappData = {
+    //         recipient_phone: whatsappContent.recipient_phone?.[0],
+    //         message: whatsappContent.body || "this is a test message app",
+    //         agent_id: whatsappContent.agent_id || "45678",
+    //         waba_phone_number: whatsappContent.business_number || "+918941999555",
+    //         company_id: whatsappContent.company_id || "A",
+    //         message_type: whatsappContent.message_type || "text"
+    //     };
+
+    //     const workflowId = this.generateWorkflowId('whatsapp');
+    //     const workflowInstance = await this.env.WHATSAPP_NOTIFICATION_WORKFLOW.create({
+    //         id: workflowId,
+    //         params: whatsappData
+    //     });
+
+    //     return this.pollWorkflowCompletion(workflowInstance, 'WhatsApp');
+    // }
     async executeWhatsappWorkflow(whatsappContent) {
-        console.log("🚀 Starting WhatsApp workflow", whatsappContent);
+        console.log("🚀 Starting WhatsApp workflows for", whatsappContent);
 
-        // Minimal data, as static payload is used in sendWhatsapp.js
-        const whatsappData = {
-            recipient_phone: whatsappContent.recipient_phone?.[0],
-            message: whatsappContent.body || "this is a test message app",
-            agent_id: whatsappContent.agent_id || "45678",
-            waba_phone_number: whatsappContent.business_number || "+918941999555",
-            company_id: whatsappContent.company_id || "A",
-            message_type: whatsappContent.message_type || "text"
-        };
+        const recipients = whatsappContent.recipient_phone || [];
+        if (recipients.length === 0) {
+            throw new Error("No recipient_phone numbers found");
+        }
 
-        const workflowId = this.generateWorkflowId('whatsapp');
-        const workflowInstance = await this.env.WHATSAPP_NOTIFICATION_WORKFLOW.create({
-            id: workflowId,
-            params: whatsappData
+        const workflowPromises = recipients.map((phone, idx) => {
+            const whatsappData = {
+                recipient_phone: phone,
+                message: whatsappContent.body,
+                agent_id: whatsappContent.agent_id,
+                waba_phone_number: whatsappContent.business_number,
+                company_id: whatsappContent.company_id,
+                message_type: whatsappContent.message_type,
+            };
+
+            const workflowId = this.generateWorkflowId(`whatsapp-${idx}`);
+            return this.env.WHATSAPP_NOTIFICATION_WORKFLOW.create({
+                id: workflowId,
+                params: whatsappData,
+            }).then(instance => this.pollWorkflowCompletion(instance, `WhatsApp-${phone}`));
         });
 
-        return this.pollWorkflowCompletion(workflowInstance, 'WhatsApp');
+        // Run all workflows concurrently
+        const results = await Promise.allSettled(workflowPromises);
+
+        return results.map((res, idx) => {
+            if (res.status === "fulfilled") {
+                return { phone: recipients[idx], status: "success", output: res.value };
+            } else {
+                return { phone: recipients[idx], status: "failed", error: res.reason.message };
+            }
+        });
     }
 
     async executeFcmWorkflow(mobileContent, fullRequest) {
