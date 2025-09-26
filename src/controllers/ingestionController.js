@@ -1,5 +1,6 @@
 // ingestionController.js
-import { createNotification } from "../helpers/postgres.js";
+import { createNotification} from "../helpers/postgres.js";
+import {createCampaignNotification} from "../helpers/createCampaign.js"
 import { sendToDurableObjectQueue, hasScheduleTime } from "../helpers/durable.js";
 import { NotificationRouter } from "../helpers/notificationRouter.js";
 
@@ -8,11 +9,18 @@ export async function queueConsumer(batch, env) {
 
   for (const msg of batch.messages) {
       try {
-      const notificationData = msg.body;
+      const notificationData = typeof msg.body === "string" ? JSON.parse(msg.body) : msg.body;
       console.log("📥 Processing Notification message:", notificationData);
 
-      // 1. Save into PostgreSQL
-      const dbResult = await createNotification(env, notificationData);
+      // 1. Save into PostgreSQL based on flag
+      let dbResult;
+      if (notificationData.flag && notificationData.flag.toLowerCase() === "campaign") {
+        console.log("📢 Campaign notification detected, saving to campaignNotifications table");
+        dbResult = await createCampaignNotification(env, notificationData);
+      } else {
+        console.log("📥 Saving to notifications table");
+        dbResult = await createNotification(env, notificationData);
+      }
       console.log("📥 Queue -> DB response:", dbResult);
 
       // 2. If scheduled → also store in Durable Object

@@ -5,6 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 [observability.logs]
 enabled = true
 
+
 # Hyperdrive binding (Postgres)
 [[hyperdrive]]
 binding = "HYPERDRIVE"

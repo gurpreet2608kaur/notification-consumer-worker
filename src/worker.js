@@ -11,106 +11,107 @@ import { WhatsappNotificationWorkflow } from "./workflows/sendWhatsapp.js";
 const app = new Hono();
 app.get("/", (c) => c.text("Consumer Worker running!"));
 app.post("/notifications", createNotification);
+// app.post("/create-compaign", createCampaignNotification);
 
-async function handleNotificationQueue(batch, env, ctx) {
-  console.log("📨 Processing notification queue");
+// async function handleNotificationQueue(batch, env, ctx) {
+//   console.log("📨 Processing notification queue");
 
-  for (const msg of batch.messages) {
-    const body = typeof msg.body === "string" ? JSON.parse(msg.body) : msg.body;
-    console.log("📌 Message body:", body);
+//   for (const msg of batch.messages) {
+//     const body = typeof msg.body === "string" ? JSON.parse(msg.body) : msg.body;
+//     console.log("📌 Message body:", body);
 
-    try {
+//     try {
      
-      // -----------------------------whatsapp workflow start-----------------------------
-      //   const whatsappData = {
-      //   recipient_phone: "+918264281425",
-      //   message: "this is a test message",
-      //   agent_id: "45678",
-      //   waba_phone_number: "+918941999555",
-      //   company_id: "A",
-      // };
+//       // -----------------------------whatsapp workflow start-----------------------------
+//       //   const whatsappData = {
+//       //   recipient_phone: "+918264281425",
+//       //   message: "this is a test message",
+//       //   agent_id: "45678",
+//       //   waba_phone_number: "+918941999555",
+//       //   company_id: "A",
+//       // };
 
-      // console.log("🚀 Starting WhatsApp workflow with:", whatsappData);
+//       // console.log("🚀 Starting WhatsApp workflow with:", whatsappData);
 
-      // // Generate a unique workflow ID
-      // const workflowId = `whatsapp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+//       // // Generate a unique workflow ID
+//       // const workflowId = `whatsapp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      // // Create and start the workflow instance
-      // console.log("📝 Creating workflow instance with ID:", workflowId);
-      // const whatsappWorkflowInstance = await env.WHATSAPP_NOTIFICATION_WORKFLOW.create({
-      //   id: workflowId,
-      //   params: whatsappData
-      // });
+//       // // Create and start the workflow instance
+//       // console.log("📝 Creating workflow instance with ID:", workflowId);
+//       // const whatsappWorkflowInstance = await env.WHATSAPP_NOTIFICATION_WORKFLOW.create({
+//       //   id: workflowId,
+//       //   params: whatsappData
+//       // });
 
-      // console.log("✅ Workflow created, checking status...");
+//       // console.log("✅ Workflow created, checking status...");
 
-      // // Get the initial status
-      // let status = await whatsappWorkflowInstance.status();
-      // console.log("📊 Initial workflow status:", status);
+//       // // Get the initial status
+//       // let status = await whatsappWorkflowInstance.status();
+//       // console.log("📊 Initial workflow status:", status);
 
-      // // Poll for completion if workflow is still running
-      // let attempts = 0;
-      // const maxAttempts = 30; // Maximum 30 attempts (30 seconds with 1-second intervals)
-      // const pollInterval = 1000; // 1 second
+//       // // Poll for completion if workflow is still running
+//       // let attempts = 0;
+//       // const maxAttempts = 30; // Maximum 30 attempts (30 seconds with 1-second intervals)
+//       // const pollInterval = 1000; // 1 second
 
-      // while (status.status === "running" || status.status === "queued" || status.status === "waiting") {
-      //   if (attempts >= maxAttempts) {
-      //     console.log("⏰ Workflow still running after maximum wait time");
-      //     break;
-      //   }
+//       // while (status.status === "running" || status.status === "queued" || status.status === "waiting") {
+//       //   if (attempts >= maxAttempts) {
+//       //     console.log("⏰ Workflow still running after maximum wait time");
+//       //     break;
+//       //   }
 
-      //   console.log(`⏳ Workflow status: ${status.status}, attempt ${attempts + 1}/${maxAttempts}`);
-      //   await new Promise(resolve => setTimeout(resolve, pollInterval));
+//       //   console.log(`⏳ Workflow status: ${status.status}, attempt ${attempts + 1}/${maxAttempts}`);
+//       //   await new Promise(resolve => setTimeout(resolve, pollInterval));
 
-      //   status = await whatsappWorkflowInstance.status();
-      //   attempts++;
-      // }
+//       //   status = await whatsappWorkflowInstance.status();
+//       //   attempts++;
+//       // }
 
-      // if (status.status === "complete") {
-      //   console.log("🎉 WhatsApp Workflow completed successfully:", status.output);
-      // } else if (status.status === "errored") {
-      //   console.error("❌ WhatsApp Workflow failed:", status.error);
-      // } else {
-      //   console.log("📊 Final WhatsApp Workflow status:", status);
-      // }
+//       // if (status.status === "complete") {
+//       //   console.log("🎉 WhatsApp Workflow completed successfully:", status.output);
+//       // } else if (status.status === "errored") {
+//       //   console.error("❌ WhatsApp Workflow failed:", status.error);
+//       // } else {
+//       //   console.log("📊 Final WhatsApp Workflow status:", status);
+//       // }
 
-      // -----------------------------whatsapp workflow end-----------------------------
+//       // -----------------------------whatsapp workflow end-----------------------------
 
-      //-----------------------------fcm workflow start----------------------------- 
-      // const deviceToken = body.content?.mobile?.fcm_token?.[0];
+//       //-----------------------------fcm workflow start----------------------------- 
+//       // const deviceToken = body.content?.mobile?.fcm_token?.[0];
 
-      //  if (!deviceToken) {
-      //     console.warn("⚠️ No device token found, skipping message");
-      //     continue;
-      //   }
+//       //  if (!deviceToken) {
+//       //     console.warn("⚠️ No device token found, skipping message");
+//       //     continue;
+//       //   }
 
-      // const workflowInput = {
-      //   deviceToken: deviceToken,
-      //   payload: {
-      //     title: body.content?.mobile?.title || "Notification",
-      //     body: body.content?.mobile?.body || "You have a new notification"
-      //   }
-      // };
+//       // const workflowInput = {
+//       //   deviceToken: deviceToken,
+//       //   payload: {
+//       //     title: body.content?.mobile?.title || "Notification",
+//       //     body: body.content?.mobile?.body || "You have a new notification"
+//       //   }
+//       // };
 
-      // console.log("🚀 Starting FCM workflow with:", workflowInput);
+//       // console.log("🚀 Starting FCM workflow with:", workflowInput);
 
-      // // Create FCM workflow instance
-      // const fcmWorkflowId = `fcm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      // const fcmWorkflowInstance = await env.NOTIFICATION_WORKFLOW.create({
-      //   id: fcmWorkflowId,
-      //   params: workflowInput
-      // });
+//       // // Create FCM workflow instance
+//       // const fcmWorkflowId = `fcm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+//       // const fcmWorkflowInstance = await env.NOTIFICATION_WORKFLOW.create({
+//       //   id: fcmWorkflowId,
+//       //   params: workflowInput
+//       // });
 
-      // const fcmResult = await fcmWorkflowInstance.result();
-      // console.log("🎉 FCM Workflow result:", fcmResult);
-      // -----------------------------fcm workflow end-----------------------------
+//       // const fcmResult = await fcmWorkflowInstance.result();
+//       // console.log("🎉 FCM Workflow result:", fcmResult);
+//       // -----------------------------fcm workflow end-----------------------------
 
-    } catch (error) {
-      console.error("❌ Error processing message:", error.message);
-      console.error("Stack:", error.stack);
-    }
-  }
-}
+//     } catch (error) {
+//       console.error("❌ Error processing message:", error.message);
+//       console.error("Stack:", error.stack);
+//     }
+//   }
+// }
 
 export default {
   fetch: app.fetch,
@@ -124,6 +125,10 @@ export default {
 
     if (batch.queue === notificationQueue) {
      // await handleNotificationQueue(batch, env, ctx);
+       for (const msg of batch.messages) {
+        const body = typeof msg.body === "string" ? JSON.parse(msg.body) : msg.body;
+        console.log("📥 Received from queue:", body);  // 👈 here’s your request object
+      }
       ctx.waitUntil(queueConsumer(batch, env));
     } else if (batch.queue === scheduledQueue) {
       console.log("⏰ Triggered by scheduled queue");
